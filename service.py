@@ -85,7 +85,7 @@ def ReadFile(path: str, type_='NM') -> tuple[list[float] | float]:
 
     return time, coords, velocities, megno, mean_megno, date
 
-def WriteFile(path: str, filename: str, data: dict):
+def WriteFile(path: str, filename: str, data: dict) -> None:
     '''
     Запись данных из data в .csv файл по пути path 
     '''
@@ -100,7 +100,7 @@ def WriteFile(path: str, filename: str, data: dict):
         writer.writerows(data)
 
 
-def PrintGraph(x: list, y: list, path: str, title: str, legend: str, save=1):
+def PrintGraph(x: list, y: list, path: str, title: str, legend: str, save=1) -> None:
     '''
     Отрисовка графика
     Параметры:
@@ -128,7 +128,7 @@ def PrintGraph(x: list, y: list, path: str, title: str, legend: str, save=1):
         plt.savefig(path + f'\{title}.png')
 
 
-def PrintCommonGraph(x: list, path: str, *args, save=1, plot_type=[1], line=1, **kwargs):
+def PrintCommonGraph(x: list, *args, save=1, plot_type=[1], line=1, **kwargs):
     '''
     Отрисовка группового графика
     * x - массив абсцисс
@@ -146,6 +146,7 @@ def PrintCommonGraph(x: list, path: str, *args, save=1, plot_type=[1], line=1, *
             'title': 'title',
         } 
     '''
+    path = kwargs.get('path')
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -172,11 +173,19 @@ def PrintCommonGraph(x: list, path: str, *args, save=1, plot_type=[1], line=1, *
             
     title = kwargs.get('title', 'Общий график')
     fig.suptitle(title)
+
+
+    graph_name = kwargs.get('graph_name')
     if save:
-        plt.savefig(path + f'\{title}.png')
+        plt.savefig(path + f'\{graph_name}.png')
 
     mngr = plt.get_current_fig_manager()
     mngr.window.geometry('+0+0')
+
+    # plt.close(fig)
+    # plt.clf()
+    # plt.cla()
+
 
 if __name__=="__main__":
     # PrintCommonGraph([1, 2, 3], [2, 3, 4], [1, 4, 2], [0,1,10])

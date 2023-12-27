@@ -1,8 +1,10 @@
-from params import mu, eps
-from math import *
 import numpy as np
-import numpy.typing as npt 
+from math import *
 from datetime import date
+import numba
+
+from params import mu, eps
+
 
 def reduce(x: float) -> float:
     '''
@@ -36,6 +38,7 @@ def anomaly(t0: float, t: float, ecc: float,
 
     return E 
 
+# @numba.njit()
 def TwoBody(t0: float, t: float, M0: float, 
             a: float, w: float, Omega: float,
             i: float, ecc: float, n: float, eps: float) -> tuple[float]:
@@ -89,6 +92,7 @@ def TwoBody(t0: float, t: float, M0: float,
     return (x, y, z, Vx, Vy, Vz)
 
 
+# @numba.njit()
 def CoordsToElements(coords: list, velocities: list) -> tuple[float]:
     '''
     Переход от координат и скоростей к элементам орбиты
@@ -133,6 +137,7 @@ def CoordsToElements(coords: list, velocities: list) -> tuple[float]:
     
     return (ecc, i, a, Omega, w, M)
 
+# @numba.njit()
 def sid2000(jd: float) -> float:
     '''
     Вычисление sid2000
@@ -150,6 +155,7 @@ def sid2000(jd: float) -> float:
     s = (24110.54841+mm+236.555367908*(d+m)+(0.093104*t-6.21E-6*t**2)*t)/86400*2*pi
     return s
 
+
 def transition(h: float, x: float) -> tuple[float]:
     A = np.array([
                 [cos(h), sin(h), 0], 
@@ -158,13 +164,14 @@ def transition(h: float, x: float) -> tuple[float]:
     
     y = A @ x
     r = sqrt(y[0]**2 + y[1]**2 + y[2]**2)
-    lmd = arctan(y[1]/y[0])
-    phi = arcsin(y[3]/r)
+    lmd = np.arctan(y[1]/y[0])
+    phi = np.arcsin(y[3]/r)
 
     return lmd, phi
 
+# @numba.njit()
 def resonance(year: int, month: int, day: float, 
-            M: float, Omega: float, w: float) -> npt.NDArray[float]:
+            M: float, Omega: float, w: float) -> list[float]:
     '''
     Вычисление критических аргументов орбитального резонанса
     '''
@@ -177,6 +184,7 @@ def resonance(year: int, month: int, day: float,
     F = np.array([F1, F2, F3, F4, F5])
     return F
 
+# @numba.njit()
 def derivative_resonance(ecc: float, i: float, a: float) -> list[float]:
     '''
     Вычисление частот оритальных резонансов
