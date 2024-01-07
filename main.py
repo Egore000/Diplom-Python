@@ -31,7 +31,7 @@ class Resonance:
         self.path_data = path_data + '\\' + infile
         self.path_fig = path_fig
         self.path_out = path_out
-        self.path_resonance = path_resonance
+        self.path_resonance = path_resonance + '\\' + infile.split('_')[1]
         self.type = type_ 
 
     # async def orbital(self, *args, **kwargs) -> None:
@@ -117,26 +117,6 @@ class Resonance:
             time2.append(np.insert(time, pos2, np.nan))
             dot_phi[index] = np.insert(dot_phi[index], pos2, np.nan)
 
-        # F1 = F[:, 0]
-        # F2 = F[:, 1]
-        # F3 = F[:, 2]
-        # F4 = F[:, 3]
-        # F5 = F[:, 4]
-
-        # dF1 = dF[:, 0]
-        # dF2 = dF[:, 1]
-        # dF3 = dF[:, 2]
-        # dF4 = dF[:, 3]
-        # dF5 = dF[:, 4]
-
-        i_arr = list(map(Degree, i_arr))
-        Omega_arr = list(map(Degree, Omega_arr))
-        w_arr = list(map(Degree, w_arr))
-        M_arr = list(map(Degree, M_arr))
-
-        # phi = (F1, F2, F3, F4, F5)
-        # dot_phi = (dF1, dF2, dF3, dF4, dF5)
-        
         F = []
         dF = []
         for l in res:
@@ -186,26 +166,27 @@ class Resonance:
                 PrintCommonGraph(time2, *dF, **params)
    
             if pair:
-                for idx in range(len(F)):
-                    args = (dF[idx], F[idx])
+                for idx in res:
+                    args = (dF[idx-1], F[idx-1])
+                    time = (time2[idx-1], time1[idx-1])
 
                     path = self.path_fig + f'\Ф{idx+1}'
                     title = self.path_data.split('_')[1].split('.')[0]
                     
                     params = {
                         'xlabel': 't, годы',
-                        'y1label': f"Ф'{idx+1}, рад/с",
-                        'y2label': f"Φ{idx+1}, °",
+                        'y1label': f"Ф'{idx}, рад/с",
+                        'y2label': f"Φ{idx}, °",
                         'path': path,
-                        'graph_name': title + f"_{idx+1}",
+                        'graph_name': title + f"_{idx}",
                         'show': show,
                         'save': autosave,
                         'plot_type': [0, 1],
-                        'title': f'Ф{idx+1}',
+                        'title': f'Ф{idx}',
                         'grid': grid,
                     }
-
-                    PrintCommonGraph(time1, *args, **params)
+                    
+                    PrintCommonGraph(time, *args, **params)
         return
 
     # async def second(self, *args, **kwargs) -> None:
@@ -219,6 +200,8 @@ class Resonance:
         graph: int - построение графиков (default=1)
         show: int - отрисовка графиков (default=1)
         line: int - отрисовка линии у=0 (default=0)
+        res: list = [1, 2, 3, 4, 5] - набор резонансов для построения
+        grid: построение сетки
         '''
         ang = kwargs.get('ang', 1)
         freq = kwargs.get('freq', 0)
@@ -226,9 +209,37 @@ class Resonance:
         graph = kwargs.get('graph', 1)
         show = kwargs.get('show', 1)
         line = kwargs.get('line', 0)
+        res = kwargs.get('res', [1, 2, 3, 4, 5])
+        grid = kwargs.get('grid', None)
 
         time, F, dF = ReadResonance(self.path_resonance)
         # PrintGraph(time, dF[0], title='Вторичный резонанс', legend='Ф1', save=autosave)
+        
+        F = np.array(F)
+        dF = np.array(dF)
+
+        phi = []
+        dot_phi = []
+        time1 = []
+        time2 = []
+        for index in range(len(F)):
+            phi.append(F[index, :])
+            dot_phi.append(dF[index, :])
+
+            pos1 = np.where(np.abs(np.diff(phi[index])) >= 230)[0] + 1
+            time1.append(np.insert(time, pos1, np.nan))
+            phi[index] = np.insert(phi[index], pos1, np.nan)
+            
+            pos2 = np.where(np.abs(np.diff(dot_phi[index])) >= 230)[0] + 1
+            time2.append(np.insert(time, pos2, np.nan))
+            dot_phi[index] = np.insert(dot_phi[index], pos2, np.nan)
+
+        F = []
+        dF = []
+        for l in res:
+            F.append(phi[l-1])
+            dF.append(dot_phi[l-1])
+
         if graph:
             if ang:
                 params = {
@@ -242,10 +253,12 @@ class Resonance:
                     'graph_name': 'Вторичные резонансы',
                     'show': show,
                     'save': autosave,
+                    # 'plot_type': [0, 0, 0, 0, 0],
                     'plot_type': [1, 1, 1, 1, 1],
                     'title': 'Вторичные резонансы',
+                    'grid': grid,
                 }
-                PrintCommonGraph(time, *F, **params)
+                PrintCommonGraph(time1, *F, **params)
             if freq:
                 params = {
                     'xlabel': 't, годы',
@@ -261,69 +274,34 @@ class Resonance:
                     'save': autosave,
                     'plot_type': [0, 0, 0, 0, 0],
                     'title': 'Вторичные резонансы, частоты',
+                    'grid': grid,
                 }
-                PrintCommonGraph(time, *dF, **params)
+                PrintCommonGraph(time2, *dF, **params)
             
             if pair:
-                for idx in range(len(F)):
-                    print(f'[DEBUG] idx = {idx}')
-                    args = (dF[idx], F[idx])
-                    path = self.path_fig + f'\Ф{idx+1}'
+                for idx in res:
+                    args = (dF[idx-1], F[idx-1])
+                    time = (time2[idx-1], time1[idx-1])
+                    path = self.path_fig + f'\Ф{idx}'
                     title = self.path_data.split('_')[1].split('.')[0]
 
                     params = {
                         'xlabel': 't, годы',
-                        'y1label': f"Ф'{idx+1}, рад/с",
-                        'y2label': f"Φ{idx+1}, °",
+                        'y1label': f"Ф'{idx}, рад/с",
+                        'y2label': f"Φ{idx}, °",
                         'path': path,
                         'graph_name': title + f'_{idx}',
                         'show': show,
                         'path': path,
                         'line': line,
                         'save': autosave,
-                        'plot_type': [0, 1, 1],
-                        'title': f'Ф{idx+1}',
+                        'plot_type': [0, 1],
+                        'title': f'Ф{idx}',
+                        'grid': grid,
                     }
 
                     PrintCommonGraph(time, *args, **params)
 
-
-    def checker(self, x: list, y: list) -> bool:
-        list1 = [x for x in range(0, 26, 5)]
-        list2 = [x for x in range(5, 31, 5)]
-
-        list3 = [x for x in range(0, 351, 50)]
-        list4 = [x for x in range(50, 401, 50)]
-
-        rect_x = list(zip(list1, list2))
-        rect_y = list(zip(list3, list4))
-
-        lenght = len(rect_x)
-
-        matrix = {}
-        for elem in product(rect_x, rect_y):
-            matrix[elem[0] + elem[1]] = 0
-        
-        
-        for t, v in zip(x, y):
-            for elem in product(rect_x, rect_y):
-                x_min = elem[0][0]
-                x_max = elem[0][1]
-                y_min = elem[1][0]
-                y_max = elem[1][1]
-
-                if x_min <= t < x_max and y_min <= v < y_max:
-                    try:
-                        matrix[elem[0] + elem[1]] += 1
-                    except KeyError:
-                        matrix[elem[0] + elem[1]] = 1
-
-        if 0 in matrix.values():
-            print('non-circular')
-        else:
-            print('circular')
-
-        print(matrix)
 
 async def gather_data():
     list_file = os.listdir(path_data)
@@ -340,8 +318,8 @@ async def gather_data():
 def main():
     # asyncio.run(gather_data())
     res = Resonance('EPH_0001.DAT', 'elements.csv', type_='9000')
-    res.orbital(ang=1, freq=0, pair=0, grid=(80, 8), show=1)
-    # res.second(ang=1, freq=1, pair=1)
+    res.orbital(ang=0, freq=0, pair=1)
+    # res.second(ang=0, freq=0, pair=1)
     # plt.show()
 
 if __name__=="__main__":

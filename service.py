@@ -6,7 +6,7 @@ import numpy as np
 
 import params
 
-def ReadResonance(path: str) -> tuple[float]:
+def ReadResonance(path: str) -> tuple[list[float], list[float], list[float]]:
     '''
     Считывание данных о вторичных резонансах из файла
     path - путь к файлу 

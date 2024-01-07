@@ -11,7 +11,7 @@ autosave = 0
 path_data = r'C:\Users\egorp\Desktop\диплом\файлы\Данные\1'
 path_fig = r'C:\Users\egorp\Desktop\диплом\файлы\графики\Орбитальные резонансы\Спутники'
 path_out = r'C:\Users\egorp\Desktop\диплом\файлы\Элементы'
-path_resonance = r'C:\Users\egorp\Desktop\диплом\файлы\Pascal\Вторичные резонансы.dat'
+path_resonance = r'C:\Users\egorp\Desktop\диплом\файлы\Данные\Выход\Вторичные\плюс'
 
 
 mu = 3.986004418e+5
