@@ -181,6 +181,9 @@ def resonance(year: int, month: int, day: float,
     F1 = F2 = F3 = reduce((M + Omega + w) - theta)*180/pi
     F4 = reduce((M + w) - theta)*180/pi
     F5 = reduce((M + 2*Omega - w) - theta)*180/pi
+    # F1 = F2 = F3 = ((M + Omega + w) - theta)*180/pi
+    # F4 = ((M + w) - theta)*180/pi
+    # F5 = ((M + 2*Omega - w) - theta)*180/pi
     F = np.array([F1, F2, F3, F4, F5])
     return F
 

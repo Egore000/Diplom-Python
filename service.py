@@ -1,8 +1,10 @@
+import os
+import time
 import matplotlib.pyplot as plt
 import csv
-import params
-import os
+import numpy as np
 
+import params
 
 def ReadResonance(path: str) -> tuple[float]:
     '''
@@ -128,15 +130,13 @@ def PrintGraph(x: list, y: list, path: str, title: str, legend: str, save=1) -> 
         plt.savefig(path + f'\{title}.png')
 
 
-def PrintCommonGraph(x: list, *args, save=1, plot_type=[1], line=1, **kwargs):
+def PrintCommonGraph(x: list, *args, **kwargs):
     '''
     Отрисовка группового графика
     * x - массив абсцисс
     * path - путь к директории для сохранения
     * *args - кортеж данных
-    * save - метка о сохранении файла
     * plot_type - метка о типе графика (0 - plot, 1 - scatter)
-    * line - метка о линии нуля (0 - нет, 1 - да)
     * **kwargs - словарь доп.параметров в формате:
         **params = {
             'xlabel': 'x',
@@ -144,9 +144,18 @@ def PrintCommonGraph(x: list, *args, save=1, plot_type=[1], line=1, **kwargs):
             'y2label': 'y2',
             ...,
             'title': 'title',
+            'line': int (default=0),
+            'save': int (default=1),
+            'plot': list (default=[1])
+            'grid': tuple (default=None)
         } 
     '''
     path = kwargs.get('path')
+    plot_type = kwargs.get('plot_type', [1])
+    line = kwargs.get('line', 0)
+    save = kwargs.get('save', 1)
+    grid = kwargs.get('grid', None)
+
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -155,13 +164,20 @@ def PrintCommonGraph(x: list, *args, save=1, plot_type=[1], line=1, **kwargs):
     idx = 0
     for axes in ax:
         if plot_type[idx] == 0:
-            plot = axes.plot(x, args[idx], color=plt.rcParams['lines.color'])
+            axes.plot(x[idx], args[idx], color=plt.rcParams['lines.color'])
         else:
-            plot = axes.scatter(x, args[idx], s=0.3, c='black')
+            axes.scatter(x[idx], args[idx], s=0.3, c='black')
 
         if line:
-            l = axes.plot([min(x), max(x)], [0, 0], color=plt.rcParams['lines.color'])
+            axes.plot([min(x[idx]), max(x[idx])], [0, 0], color=plt.rcParams['lines.color'])
     
+        if grid:
+            x_points = np.linspace(-2, int(max(x[idx])) + 2, grid[0])
+            y_points = np.linspace(-2, int(max(args[idx])) + 2, grid[1])
+            axes.set_xticks(x_points, minor=True)
+            axes.set_yticks(y_points, minor=True)
+            axes.grid(which='both')
+
         axes.set_ylabel(kwargs.get(f'y{idx+1}label', f'y{idx+1}'))
         
         if idx % 2 == 1:
@@ -174,7 +190,6 @@ def PrintCommonGraph(x: list, *args, save=1, plot_type=[1], line=1, **kwargs):
     title = kwargs.get('title', 'Общий график')
     fig.suptitle(title)
 
-
     graph_name = kwargs.get('graph_name')
     if save:
         plt.savefig(path + f'\{graph_name}.png')
@@ -182,9 +197,25 @@ def PrintCommonGraph(x: list, *args, save=1, plot_type=[1], line=1, **kwargs):
     mngr = plt.get_current_fig_manager()
     mngr.window.geometry('+0+0')
 
-    # plt.close(fig)
+    if kwargs.get('show', None):
+        plt.show()
+    plt.close(fig)
     # plt.clf()
     # plt.cla()
+    
+
+def timer(func):
+    '''
+    Декоратор для измерения времени работы функции
+    '''
+    def wrap():
+        start_time = time.time()
+        func()
+        finish_time = time.time()
+        runtime = finish_time - start_time
+        print(f'[TIME] runtime: {runtime:.2f} c')
+    return wrap
+
 
 
 if __name__=="__main__":

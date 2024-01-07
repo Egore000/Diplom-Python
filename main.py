@@ -11,12 +11,19 @@ from service import *
 from mechanics import *
 from params import *
 
-start_time = time.time()
-
-autosave = 0
 plt.rcParams.update(custom_rcParams)
 
 class Resonance:
+    '''
+    Класс для работы с данными о резонансах
+
+    Параметры:
+    ```
+    infile: str    # путь к файлу с данными о резонансе
+    outfile: str   # путь к файлу для записи элементов орбиты
+    type_: str     # тип файла ('9000' - файлы из набора 9000 спутников
+                   #            'NM' - файлы численной модели (ЧМ ИСЗ))
+    '''
     def __init__(self, infile: str, outfile: str,  type_: str):
         self.infile = infile
         self.outfile = outfile
@@ -27,10 +34,35 @@ class Resonance:
         self.path_resonance = path_resonance
         self.type = type_ 
 
-    # def orbital(self, ang=0, freq=0, pair=1, write=0, graph=1) -> None:
-    async def orbital(self, ang=0, freq=0, pair=1, write=0, graph=1) -> None:
+    # async def orbital(self, *args, **kwargs) -> None:
+    def orbital(self, *args, **kwargs) -> None:
+        '''
+        Орбитальные резонансы (1 порядок)
+
+        Параметры:
+        ```
+        ang: int = 0   #графики углов резонанса
+        freq: int = 0   #графики частот резонанса
+        pair: int = 1   #парные графики для компонент резонанса
+        write: int = 0   #запись в файл (default=0)
+        graph: int = 1   #графики (default=1)
+        show: int = 1   #отрисовка графика (default=1)
+        line: int = 0   #отрисовка линии y=0
+        res: list = [1, 2, 3, 4, 5]   #построение графиков для выбранных резонансов
+        grid: tuple = None   #построение сетки
+        '''
         # await asyncio.sleep(0.1)
         print(f'[INFO] file: {self.path_data}')
+        ang = kwargs.get('ang', 0)
+        freq = kwargs.get('freq', 0)
+        pair = kwargs.get('pair', 1)
+        write = kwargs.get('write', 0)
+        graph = kwargs.get('graph', 1)
+        show = kwargs.get('show', 1)
+        line = kwargs.get('line', 0)
+        res = kwargs.get('res', [1, 2, 3, 4, 5])
+        grid = kwargs.get('grid', None)
+
         time, coords, velocities, megno, mean_megno, date = ReadFile(self.path_data, type_=self.type)
 
         ecc_arr = []
@@ -69,27 +101,48 @@ class Resonance:
         F = np.array(F)
         dF = np.array(dF)
 
-        F1 = F[:, 0]
-        F2 = F[:, 1]
-        F3 = F[:, 2]
-        F4 = F[:, 3]
-        F5 = F[:, 4]
-        
-        # self.checker(time, F1)
+        phi = []
+        dot_phi = []
+        time1 = []
+        time2 = []
+        for index in range(len(F[0])):
+            phi.append(F[:, index])
+            dot_phi.append(dF[:, index])
 
-        dF1 = dF[:, 0]
-        dF2 = dF[:, 1]
-        dF3 = dF[:, 2]
-        dF4 = dF[:, 3]
-        dF5 = dF[:, 4]
+            pos1 = np.where(np.abs(np.diff(phi[index])) >= 240)[0] + 1
+            time1.append(np.insert(time, pos1, np.nan))
+            phi[index] = np.insert(phi[index], pos1, np.nan)
+            
+            pos2 = np.where(np.abs(np.diff(dot_phi[index])) >= 240)[0] + 1
+            time2.append(np.insert(time, pos2, np.nan))
+            dot_phi[index] = np.insert(dot_phi[index], pos2, np.nan)
+
+        # F1 = F[:, 0]
+        # F2 = F[:, 1]
+        # F3 = F[:, 2]
+        # F4 = F[:, 3]
+        # F5 = F[:, 4]
+
+        # dF1 = dF[:, 0]
+        # dF2 = dF[:, 1]
+        # dF3 = dF[:, 2]
+        # dF4 = dF[:, 3]
+        # dF5 = dF[:, 4]
 
         i_arr = list(map(Degree, i_arr))
         Omega_arr = list(map(Degree, Omega_arr))
         w_arr = list(map(Degree, w_arr))
         M_arr = list(map(Degree, M_arr))
 
-        F = (F1, F2, F3, F4, F5)
-        dF = (dF1, dF2, dF3, dF4, dF5)
+        # phi = (F1, F2, F3, F4, F5)
+        # dot_phi = (dF1, dF2, dF3, dF4, dF5)
+        
+        F = []
+        dF = []
+        for l in res:
+            F.append(phi[l-1])
+            dF.append(dot_phi[l-1])
+
         if write:
             WriteFile(self.path_out, self.outfile, data)
 
@@ -104,8 +157,14 @@ class Resonance:
                     'y5label': 'Φ5, °',
                     'path': self.path_fig,
                     'graph_name': 'Орбитальные резонансы',
+                    'show': show,
+                    'save': autosave,
+                    # 'plot_type': [1, 1, 1, 1, 1],
+                    'plot_type': [0, 0, 0, 0, 0],
+                    'title': 'Орбитальные резонансы',
+                    'grid': grid,
                 }
-                PrintCommonGraph(time, self.path_fig, *F, save=autosave, plot_type=[1, 1, 1, 1, 1], title='Орбитальные резонансы', **params)
+                PrintCommonGraph(time1, *F, **params)
         
             if freq:
                 params = {
@@ -116,9 +175,15 @@ class Resonance:
                     'y4label': "Φ'4, рад/с",
                     'y5label': "Φ'5, рад/с",
                     'path': self.path_fig,
-                    'graph_name': 'Орбитальные резонансы, частоты'
+                    'graph_name': 'Орбитальные резонансы, частоты',
+                    'show': show,
+                    'line': line,
+                    'save': autosave,
+                    'plot_type': [0, 0, 0, 0, 0],
+                    'title': 'Орбитальные резонансы, частоты',
+                    'grid': grid,
                 }
-                PrintCommonGraph(time, *dF, save=autosave, plot_type=[0, 0, 0, 0, 0], title='Орбитальные резонансы, частоты', line=1, **params)
+                PrintCommonGraph(time2, *dF, **params)
    
             if pair:
                 for idx in range(len(F)):
@@ -132,14 +197,36 @@ class Resonance:
                         'y1label': f"Ф'{idx+1}, рад/с",
                         'y2label': f"Φ{idx+1}, °",
                         'path': path,
-                        'graph_name': title + f"_{idx+1}"
+                        'graph_name': title + f"_{idx+1}",
+                        'show': show,
+                        'save': autosave,
+                        'plot_type': [0, 1],
+                        'title': f'Ф{idx+1}',
+                        'grid': grid,
                     }
 
-                    PrintCommonGraph(time, *args, save=autosave, plot_type=[0, 1], title=f'Ф{idx+1}', line=0, **params)
+                    PrintCommonGraph(time1, *args, **params)
         return
 
-    def second(self, ang=1, freq=0, graph=1, pair=0) -> None:
-    # async def second(self, ang=1, freq=0, graph=1, pair=0) -> None:
+    # async def second(self, *args, **kwargs) -> None:
+    def second(self, *args, **kwargs) -> None:
+        '''
+        Вторичные резонансы
+        ```
+        ang: int - графики углов (default=1)
+        freq: int - графики частот (default=0)
+        pair: int - построение парных графиков (default=0)
+        graph: int - построение графиков (default=1)
+        show: int - отрисовка графиков (default=1)
+        line: int - отрисовка линии у=0 (default=0)
+        '''
+        ang = kwargs.get('ang', 1)
+        freq = kwargs.get('freq', 0)
+        pair = kwargs.get('pair', 0)
+        graph = kwargs.get('graph', 1)
+        show = kwargs.get('show', 1)
+        line = kwargs.get('line', 0)
+
         time, F, dF = ReadResonance(self.path_resonance)
         # PrintGraph(time, dF[0], title='Вторичный резонанс', legend='Ф1', save=autosave)
         if graph:
@@ -152,9 +239,13 @@ class Resonance:
                     'y4label': 'Φ4, °',
                     'y5label': 'Φ5, °',
                     'path': self.path_fig,
-                    'graph_name': 'Вторичные резонансы'
+                    'graph_name': 'Вторичные резонансы',
+                    'show': show,
+                    'save': autosave,
+                    'plot_type': [1, 1, 1, 1, 1],
+                    'title': 'Вторичные резонансы',
                 }
-                PrintCommonGraph(time, *F, save=autosave, plot_type=[1, 1, 1, 1, 1], title='Вторичные резонансы', **params)
+                PrintCommonGraph(time, *F, **params)
             if freq:
                 params = {
                     'xlabel': 't, годы',
@@ -164,12 +255,18 @@ class Resonance:
                     'y4label': "Φ'4, рад/с",
                     'y5label': "Φ'5, рад/с",
                     'path': self.path_fig,
-                    'graph_name': 'Вторичные резонансы, частоты'
+                    'graph_name': 'Вторичные резонансы, частоты',
+                    'show': show,
+                    'line': line,
+                    'save': autosave,
+                    'plot_type': [0, 0, 0, 0, 0],
+                    'title': 'Вторичные резонансы, частоты',
                 }
-                PrintCommonGraph(time, *dF, save=autosave, plot_type=[0, 0, 0, 0, 0], title='Вторичные резонансы, частоты', line=0, **params)
+                PrintCommonGraph(time, *dF, **params)
             
             if pair:
                 for idx in range(len(F)):
+                    print(f'[DEBUG] idx = {idx}')
                     args = (dF[idx], F[idx])
                     path = self.path_fig + f'\Ф{idx+1}'
                     title = self.path_data.split('_')[1].split('.')[0]
@@ -179,10 +276,16 @@ class Resonance:
                         'y1label': f"Ф'{idx+1}, рад/с",
                         'y2label': f"Φ{idx+1}, °",
                         'path': path,
-                        'graph_name': title + f'_{idx}'
+                        'graph_name': title + f'_{idx}',
+                        'show': show,
+                        'path': path,
+                        'line': line,
+                        'save': autosave,
+                        'plot_type': [0, 1, 1],
+                        'title': f'Ф{idx+1}',
                     }
 
-                    PrintCommonGraph(time, path, *args, save=autosave, plot_type=[0, 1, 1], title=f'Ф{idx+1}', line=0, **params)
+                    PrintCommonGraph(time, *args, **params)
 
 
     def checker(self, x: list, y: list) -> bool:
@@ -226,26 +329,19 @@ async def gather_data():
     list_file = os.listdir(path_data)
     
     tasks = []
-    for num, dat in enumerate(list_file[:100]):
+    for num, dat in enumerate(list_file[:2]):
         res = Resonance(dat, f'elements_{num}.csv', type_='9000')
-        task = asyncio.create_task(res.orbital(write=1, graph=0))
+        task = asyncio.create_task(res.orbital(write=0, graph=1))
         tasks.append(task)
 
     await asyncio.gather(*tasks)
 
+@timer
 def main():
-    asyncio.run(gather_data())
-
-    # list_file = os.listdir(path_data)
-    # for num, dat in enumerate(list_file[:100]):
-    #     res = Resonance(dat, f'elements_{num}.csv', type_='9000')
-    #     res.orbital(write=1, graph=0)
-
-    print(f'[TIME] {time.time() - start_time}')
-    # count = 0
-    # res = Resonance('EPH_7569.DAT', 'elements.csv', type_='9000')
-    # res.orbital(write=0, graph=1)
-    # res.checker([3, 4, 5, 6], [8.5, 9, 12, 44])
+    # asyncio.run(gather_data())
+    res = Resonance('EPH_0001.DAT', 'elements.csv', type_='9000')
+    res.orbital(ang=1, freq=0, pair=0, grid=(80, 8), show=1)
+    # res.second(ang=1, freq=1, pair=1)
     # plt.show()
 
 if __name__=="__main__":

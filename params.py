@@ -1,12 +1,14 @@
 import matplotlib.pyplot as plt
 import math
 
+autosave = 0
+
 # path_data = r'C:\Users\egorp\Desktop\диплом\файлы\ЧМ ИСЗ (для ПК) 28.04.20 Lobbie III'
 # path_fig = r'C:\Users\egorp\Desktop\диплом\файлы\графики\Орбитальные резонансы'
 # path_out = r'C:\Users\egorp\Desktop\диплом\файлы\Элементы'
 # path_resonance = r'C:\Users\egorp\Desktop\диплом\файлы\Pascal\Вторичные резонансы.dat'
 
-path_data = r'C:\Users\egorp\Desktop\диплом\файлы\Данные'
+path_data = r'C:\Users\egorp\Desktop\диплом\файлы\Данные\1'
 path_fig = r'C:\Users\egorp\Desktop\диплом\файлы\графики\Орбитальные резонансы\Спутники'
 path_out = r'C:\Users\egorp\Desktop\диплом\файлы\Элементы'
 path_resonance = r'C:\Users\egorp\Desktop\диплом\файлы\Pascal\Вторичные резонансы.dat'
@@ -29,6 +31,7 @@ custom_rcParams = {
     'font.size': 10,
     'lines.linewidth': 0.7,
     'lines.color': 'black',
+    # 'lines.linestyle': ':',
     'grid.alpha': 0.5,
     'font.family': 'Times New Roman'
 }
