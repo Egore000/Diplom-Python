@@ -155,6 +155,7 @@ def PrintCommonGraph(x: list, *args, **kwargs):
     line = kwargs.get('line', 0)
     save = kwargs.get('save', 1)
     grid = kwargs.get('grid', None)
+    annotate = kwargs.get('annotate', False)
 
     if not os.path.exists(path):
         os.makedirs(path)
@@ -162,11 +163,29 @@ def PrintCommonGraph(x: list, *args, **kwargs):
     fig = plt.figure(figsize=(7, 6))
     ax = fig.subplots(len(args), 1)
     idx = 0
+
+    def enum(x):
+        i = 0
+        y = []
+        for item in x:
+            if np.isnan(item):
+                y.append(('', np.nan))
+            else:
+                y.append((i, item)) 
+                i += 1
+        return y               
+
     for axes in ax:
+        text = list(zip(*enum(x[idx])))[0]
+
         if plot_type[idx] == 0:
             axes.plot(x[idx], args[idx], color=plt.rcParams['lines.color'])
         else:
             axes.scatter(x[idx], args[idx], s=0.3, c='black')
+
+        if annotate:
+            for i in range(len(text)):
+                axes.annotate(text[i], (x[idx][i], args[idx][i] + 0.2), size=4)
 
         if line:
             axes.plot([min(x[idx]), max(x[idx])], [0, 0], color=plt.rcParams['lines.color'])
@@ -221,8 +240,9 @@ def timer(func):
 if __name__=="__main__":
     # PrintCommonGraph([1, 2, 3], [2, 3, 4], [1, 4, 2], [0,1,10])
     # t, F, dF = ReadResonance(r'C:\Users\egorp\Desktop\диплом\файлы\Pascal\Вторичные резонансы.dat')
-    list_file = os.listdir(params.path_data)
+    # list_file = os.listdir(params.path_data)
 
-    for dat in list_file[:1]:
-        args = ReadFile(params.path_data + "\\" + dat)
-        print(args[0])
+    # for dat in list_file[:1]:
+    #     args = ReadFile(params.path_data + "\\" + dat)
+    #     print(args[0])
+    ...

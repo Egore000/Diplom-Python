@@ -62,6 +62,12 @@ class Resonance:
         line = kwargs.get('line', 0)
         res = kwargs.get('res', [1, 2, 3, 4, 5])
         grid = kwargs.get('grid', None)
+        plot_type = kwargs.get('plot_type', { 
+            'ang': [0, 0, 0, 0, 0],
+            'freq': [1, 1, 1, 1, 1],
+            'pair': [0, 1]
+        })
+        annotate = kwargs.get('annotate', 0)
 
         time, coords, velocities, megno, mean_megno, date = ReadFile(self.path_data, type_=self.type)
 
@@ -117,11 +123,11 @@ class Resonance:
             time2.append(np.insert(time, pos2, np.nan))
             dot_phi[index] = np.insert(dot_phi[index], pos2, np.nan)
 
-        F = []
-        dF = []
+        F = [[]] * 5
+        dF = [[]] * 5
         for l in res:
-            F.append(phi[l-1])
-            dF.append(dot_phi[l-1])
+            F[l-1] = phi[l-1]
+            dF[l-1] = dot_phi[l-1]
 
         if write:
             WriteFile(self.path_out, self.outfile, data)
@@ -143,6 +149,8 @@ class Resonance:
                     'plot_type': [0, 0, 0, 0, 0],
                     'title': 'Орбитальные резонансы',
                     'grid': grid,
+                    'annotate': annotate,
+                    'plot_type': plot_type['ang']
                 }
                 PrintCommonGraph(time1, *F, **params)
         
@@ -162,6 +170,8 @@ class Resonance:
                     'plot_type': [0, 0, 0, 0, 0],
                     'title': 'Орбитальные резонансы, частоты',
                     'grid': grid,
+                    'annotate': annotate,
+                    'plot_type': plot_type['freq']
                 }
                 PrintCommonGraph(time2, *dF, **params)
    
@@ -184,6 +194,8 @@ class Resonance:
                         'plot_type': [0, 1],
                         'title': f'Ф{idx}',
                         'grid': grid,
+                        'annotate': annotate,
+                        'plot_type': plot_type['pair']
                     }
                     
                     PrintCommonGraph(time, *args, **params)
@@ -211,9 +223,15 @@ class Resonance:
         line = kwargs.get('line', 0)
         res = kwargs.get('res', [1, 2, 3, 4, 5])
         grid = kwargs.get('grid', None)
+        plot_type = kwargs.get('plot_type', {
+            'ang': [0, 0, 0, 0, 0],
+            'freq': [1, 1, 1, 1, 1],
+            'pair': [0, 1]
+        })
+        annotate = kwargs.get('annotate', False)
+        
 
         time, F, dF = ReadResonance(self.path_resonance)
-        # PrintGraph(time, dF[0], title='Вторичный резонанс', legend='Ф1', save=autosave)
         
         F = np.array(F)
         dF = np.array(dF)
@@ -226,19 +244,19 @@ class Resonance:
             phi.append(F[index, :])
             dot_phi.append(dF[index, :])
 
-            pos1 = np.where(np.abs(np.diff(phi[index])) >= 230)[0] + 1
-            time1.append(np.insert(time, pos1, np.nan))
-            phi[index] = np.insert(phi[index], pos1, np.nan)
+            pos1 = np.where(np.abs(np.diff(phi[index])) >= 240)[0] + 1
+            time1.append(np.insert(time, pos1, None))
+            phi[index] = np.insert(phi[index], pos1, None)
             
-            pos2 = np.where(np.abs(np.diff(dot_phi[index])) >= 230)[0] + 1
-            time2.append(np.insert(time, pos2, np.nan))
-            dot_phi[index] = np.insert(dot_phi[index], pos2, np.nan)
+            pos2 = np.where(np.abs(np.diff(dot_phi[index])) >= 240)[0] + 1
+            time2.append(np.insert(time, pos2, None))
+            dot_phi[index] = np.insert(dot_phi[index], pos2, None)
 
-        F = []
-        dF = []
+        F = [[]] * 5
+        dF = [[]] * 5
         for l in res:
-            F.append(phi[l-1])
-            dF.append(dot_phi[l-1])
+            F[l-1] = phi[l-1]
+            dF[l-1] = dot_phi[l-1]
 
         if graph:
             if ang:
@@ -254,9 +272,10 @@ class Resonance:
                     'show': show,
                     'save': autosave,
                     # 'plot_type': [0, 0, 0, 0, 0],
-                    'plot_type': [1, 1, 1, 1, 1],
+                    'plot_type': plot_type['ang'],
                     'title': 'Вторичные резонансы',
                     'grid': grid,
+                    'annotate': annotate,
                 }
                 PrintCommonGraph(time1, *F, **params)
             if freq:
@@ -272,9 +291,10 @@ class Resonance:
                     'show': show,
                     'line': line,
                     'save': autosave,
-                    'plot_type': [0, 0, 0, 0, 0],
+                    'plot_type': plot_type['freq'],
                     'title': 'Вторичные резонансы, частоты',
                     'grid': grid,
+                    'annotate': annotate,
                 }
                 PrintCommonGraph(time2, *dF, **params)
             
@@ -295,9 +315,11 @@ class Resonance:
                         'path': path,
                         'line': line,
                         'save': autosave,
-                        'plot_type': [0, 1],
+                        # 'plot_type': [0, 1],
+                        'plot_type': plot_type['pair'],
                         'title': f'Ф{idx}',
                         'grid': grid,
+                        'annotate': annotate,
                     }
 
                     PrintCommonGraph(time, *args, **params)
@@ -317,10 +339,32 @@ async def gather_data():
 @timer
 def main():
     # asyncio.run(gather_data())
-    res = Resonance('EPH_0001.DAT', 'elements.csv', type_='9000')
-    res.orbital(ang=0, freq=0, pair=1)
-    # res.second(ang=0, freq=0, pair=1)
-    # plt.show()
+    res = Resonance('EPH_0010.DAT', 'elements.csv', type_='9000')
+    res.orbital(
+        ang=0, 
+        freq=0, 
+        pair=1, 
+        plot_type={
+            'ang': [1] * 5,
+            'freq': [0] * 5,
+            'pair': [0, 1]
+        }, 
+        annotate=1,
+        res=[1, 5],
+        show=0)
+    
+    res.second(
+        ang=0, 
+        freq=0, 
+        pair=1, 
+        plot_type={
+            'ang': [1] * 5,
+            'freq': [0] * 5,
+            'pair': [0, 1]
+        }, 
+        annotate=0,
+        res=[1, 5],
+        show=0)
 
 if __name__=="__main__":
     main()
