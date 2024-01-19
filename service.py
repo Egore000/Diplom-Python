@@ -160,7 +160,7 @@ def PrintCommonGraph(x: list, *args, **kwargs):
     if not os.path.exists(path):
         os.makedirs(path)
 
-    fig = plt.figure(figsize=(7, 6))
+    fig = plt.figure(figsize=(12, 7))
     ax = fig.subplots(len(args), 1)
     idx = 0
 
@@ -223,6 +223,68 @@ def PrintCommonGraph(x: list, *args, **kwargs):
     # plt.cla()
     
 
+def PrintMap(data, *args, **kwargs) -> None:
+    '''
+    Отрисовка зон действия резонансов
+    * res - Зоны резонансов 1 порядка
+    * sec_plus - Зоны вторичных резонансов со знаком +
+    * sec_minus - Зоны вторичных резонансов со знаком -
+    '''
+    res = kwargs.get('res', True)
+    sec_plus = kwargs.get('sec_plus', True)
+    sec_minus = kwargs.get('sec_minus', True)
+    marker = kwargs.get('marker', 's')
+    size = kwargs.get('s', 10)
+    color = kwargs.get('colors', ['#FFFFFF', '#F0F0F0', '#A0A0A0'])
+    save = kwargs.get('save', params.autosave)
+    show = kwargs.get('show', 1)
+    path = kwargs.get('path', params.path_map)
+    
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    arguments = {
+        'Орбитальные резонансы': ['Ф1', 'Ф2', 'Ф3', 'Ф4', 'Ф5'],
+        'Вторичные резонансы (+)': ['Ф1s+', 'Ф2s+', 'Ф3s+', 'Ф4s+', 'Ф5s+'],
+        'Вторичные резонансы (-)': ['Ф1s-', 'Ф2s-', 'Ф3s-', 'Ф4s-', 'Ф5s-']
+    }
+
+    d = []
+
+    if res:
+        d.append("Орбитальные резонансы")
+    if sec_plus:
+        d.append("Вторичные резонансы (+)")
+    if sec_minus:
+        d.append("Вторичные резонансы (-)")
+
+    for i in d:
+        if save:
+            if not os.path.exists(path + f'\\{i}'):
+                os.makedirs(path + f'\\{i}')
+
+        for arg in arguments[i]:
+            df = data[['Номер папки', 'номер файла', 'а, км', 'i, град', arg]]
+
+            circular = df[df[arg] == 0.]
+            libration = df[df[arg] == 1.]
+            mixed = df[df[arg] == 2.]
+
+            plt.scatter(circular['i, град'], circular['а, км'], marker=marker, color=color[0], s=size)
+            plt.scatter(libration['i, град'], libration['а, км'], marker=marker, color=color[1], s=size)
+            plt.scatter(mixed['i, град'], mixed['а, км'], marker=marker, color=color[2], s=size)
+
+            plt.title(arg)
+            plt.xlabel('i, град')
+            plt.ylabel('a, км')
+
+            if show:
+                plt.show()
+
+            if save:
+                plt.savefig(path + f'\\{i}\\{arg}.png')
+    return
+
 def timer(func):
     '''
     Декоратор для измерения времени работы функции
@@ -235,9 +297,12 @@ def timer(func):
         print(f'[TIME] runtime: {runtime:.2f} c')
     return wrap
 
-
-
 if __name__=="__main__":
+    import pandas as pd
+
+    data = pd.read_excel(params.PATH_CLASSIFICATION)
+    PrintMap(data, res=True, sec_plus=True, sec_minus=True, save=1)
+
     # PrintCommonGraph([1, 2, 3], [2, 3, 4], [1, 4, 2], [0,1,10])
     # t, F, dF = ReadResonance(r'C:\Users\egorp\Desktop\диплом\файлы\Pascal\Вторичные резонансы.dat')
     # list_file = os.listdir(params.path_data)

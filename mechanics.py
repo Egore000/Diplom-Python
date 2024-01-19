@@ -171,24 +171,24 @@ def transition(h: float, x: float) -> tuple[float]:
 
 # @numba.njit()
 def resonance(year: int, month: int, day: float, 
-            M: float, Omega: float, w: float) -> list[float]:
+            M: float, Omega: float, w: float, u: int, v: int) -> list[float]:
     '''
     Вычисление критических аргументов орбитального резонанса
     '''
     jd = date(year, month, day).toordinal() + 1721424.5
     theta = sid2000(jd)
     
-    F1 = F2 = F3 = reduce((M + Omega + w) - theta)*180/pi
-    F4 = reduce((M + w) - theta)*180/pi
-    F5 = reduce((M + 2*Omega - w) - theta)*180/pi
-    # F1 = F2 = F3 = ((M + Omega + w) - theta)*180/pi
-    # F4 = ((M + w) - theta)*180/pi
-    # F5 = ((M + 2*Omega - w) - theta)*180/pi
+    F1 = reduce(u * (M + Omega + w) - v * theta) * 180/pi
+    F2 = reduce(u * (M + w) + v * (Omega - theta)) * 180/pi
+    F3 = reduce(u * M + v * Omega) * 180/pi
+    F4 = reduce(F1 - v * Omega) * 180/pi
+    F5 = reduce(F3 + v * Omega - 2 * v * w) * 180/pi
+    
     F = np.array([F1, F2, F3, F4, F5])
     return F
 
 # @numba.njit()
-def derivative_resonance(ecc: float, i: float, a: float) -> list[float]:
+def derivative_resonance(ecc: float, i: float, a: float, u: int, v: int) -> list[float]:
     '''
     Вычисление частот оритальных резонансов
     '''
@@ -217,9 +217,11 @@ def derivative_resonance(ecc: float, i: float, a: float) -> list[float]:
     Omega = OmegaJ2 + OmegaL + OmegaS
     w = wJ2 + wL + wS
 
-    F1 = F2 = F3 = n + Omega + w - theta
-    F4 = n + w - theta
-    F5 = n + 2*Omega - w - theta
+    F1 = u * (n + Omega + w) - v * theta
+    F2 = u * (n + w) + v * (Omega - theta)
+    F3 = u * n + v * (Omega + w - theta)
+    F4 = F1 - v * Omega
+    F5 = F3 + v * Omega - 2 * v * w
     F = [F1, F2, F3, F4, F5]
     return F
 

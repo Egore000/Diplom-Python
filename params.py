@@ -2,17 +2,19 @@ import matplotlib.pyplot as plt
 import math
 
 autosave = 0
+BASE_FOLDER = r'C:\Users\egorp\Desktop\диплом\файлы'
 
-# path_data = r'C:\Users\egorp\Desktop\диплом\файлы\ЧМ ИСЗ (для ПК) 28.04.20 Lobbie III'
-# path_fig = r'C:\Users\egorp\Desktop\диплом\файлы\графики\Орбитальные резонансы'
-# path_out = r'C:\Users\egorp\Desktop\диплом\файлы\Элементы'
-# path_resonance = r'C:\Users\egorp\Desktop\диплом\файлы\Pascal\Вторичные резонансы.dat'
+# PATH_DATA = BASE_FOLDER + r'\ЧМ ИСЗ (для ПК) 28.04.20 Lobbie III'
+# PATH_FIG = BASE_FOLDER + r'\графики\Орбитальные резонансы'
+# PATH_OUT = BASE_FOLDER + r'\Элементы'
+# PATH_RESONANCE = BASE_FOLDER + r'\Вторичные резонансы.dat'
 
-path_data = r'C:\Users\egorp\Desktop\диплом\файлы\Данные\1'
-path_fig = r'C:\Users\egorp\Desktop\диплом\файлы\графики\Орбитальные резонансы\Спутники'
-path_out = r'C:\Users\egorp\Desktop\диплом\файлы\Элементы'
-path_resonance = r'C:\Users\egorp\Desktop\диплом\файлы\Данные\Выход\Вторичные\плюс'
-
+PATH_DATA = BASE_FOLDER + r'\Данные\1'
+PATH_FIG = BASE_FOLDER + r'\графики\Орбитальные резонансы\Спутники'
+PATH_OUT = BASE_FOLDER + r'\Элементы'
+PATH_RESONANCE = BASE_FOLDER + r'\Данные\Выход\Вторичные\минус'
+PATH_CLASSIFICATION = BASE_FOLDER + r'\Rezonansy1_2.xlsx'
+PATH_MAP = BASE_FOLDER + r'\графики\Зоны'
 
 mu = 3.986004418e+5
 eps = 1e-12
@@ -31,7 +33,7 @@ custom_rcParams = {
     'font.size': 10,
     'lines.linewidth': 0.7,
     'lines.color': 'black',
-    # 'lines.linestyle': ':',
+    # 'lines.linestyle': 'dotted',
     'grid.alpha': 0.5,
     'font.family': 'Times New Roman'
 }

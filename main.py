@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import *
 import asyncio
+import pandas as pd
 
 from itertools import product
 from AnglesPy import Angles
@@ -24,15 +25,18 @@ class Resonance:
     type_: str     # тип файла ('9000' - файлы из набора 9000 спутников
                    #            'NM' - файлы численной модели (ЧМ ИСЗ))
     '''
-    def __init__(self, infile: str, outfile: str,  type_: str):
+    def __init__(self, infile: str, outfile: str, u=1, v=2, type_='9000'):
         self.infile = infile
         self.outfile = outfile
         
-        self.path_data = path_data + '\\' + infile
-        self.path_fig = path_fig
-        self.path_out = path_out
-        self.path_resonance = path_resonance + '\\' + infile.split('_')[1]
+        self.path_data = PATH_DATA + '\\' + infile
+        self.path_fig = PATH_FIG
+        self.path_out = PATH_OUT
+        self.path_resonance = PATH_RESONANCE + '\\' + infile.split('_')[1]
         self.type = type_ 
+
+        self.u = u
+        self.v = v
 
     # async def orbital(self, *args, **kwargs) -> None:
     def orbital(self, *args, **kwargs) -> None:
@@ -101,8 +105,8 @@ class Resonance:
                 'Mean MEGNO': mean_megno[idx]
             })
 
-            F.append(resonance(*date[idx], M=M, Omega=Omega, w=w))
-            dF.append(derivative_resonance(ecc=ecc, i=i, a=a))
+            F.append(resonance(*date[idx], M=M, Omega=Omega, w=w, u=self.u, v=self.v))
+            dF.append(derivative_resonance(ecc=ecc, i=i, a=a, u=self.u, v=self.v))
 
         F = np.array(F)
         dF = np.array(dF)
@@ -326,7 +330,7 @@ class Resonance:
 
 
 async def gather_data():
-    list_file = os.listdir(path_data)
+    list_file = os.listdir(PATH_DATA)
     
     tasks = []
     for num, dat in enumerate(list_file[:2]):
@@ -339,7 +343,9 @@ async def gather_data():
 @timer
 def main():
     # asyncio.run(gather_data())
-    res = Resonance('EPH_0010.DAT', 'elements.csv', type_='9000')
+    data = pd.read_excel(PATH_CLASSIFICATION)
+
+    res = Resonance('EPH_8998.DAT', 'elements.csv', type_='9000', u=1, v=2)
     res.orbital(
         ang=0, 
         freq=0, 
@@ -349,9 +355,9 @@ def main():
             'freq': [0] * 5,
             'pair': [0, 1]
         }, 
-        annotate=1,
-        res=[1, 5],
-        show=0)
+        annotate=0,
+        # res=[1],
+        show=1)
     
     res.second(
         ang=0, 
@@ -363,8 +369,10 @@ def main():
             'pair': [0, 1]
         }, 
         annotate=0,
-        res=[1, 5],
+        # res=[1, 5],
         show=0)
+    
+    PrintMap(data, res=True, sec_plus=True, sec_minus=True, save=0, show=0)
 
 if __name__=="__main__":
     main()
