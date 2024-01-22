@@ -38,3 +38,12 @@ custom_rcParams = {
     'grid.alpha': 0.5,
     'font.family': 'Times New Roman'
 }
+
+FIGSIZE = (6, 4)
+
+marker_style = {
+    'marker': '.',
+    's': 0.3,
+    'c': 'black',
+    'alpha': 1,
+}

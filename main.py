@@ -38,6 +38,8 @@ class Resonance:
         self.u = u
         self.v = v
 
+        self.filer = Filer(self.path_data, self.path_resonance, self.path_out)
+
     # async def orbital(self, *args, **kwargs) -> None:
     def orbital(self, *args, **kwargs) -> None:
         '''
@@ -73,7 +75,7 @@ class Resonance:
         })
         annotate = kwargs.get('annotate', 0)
 
-        time, coords, velocities, megno, mean_megno, date = ReadFile(self.path_data, type_=self.type)
+        time, coords, velocities, megno, mean_megno, date = self.filer.ReadFile(type_=self.type)
 
         ecc_arr = []
         i_arr = []
@@ -134,7 +136,7 @@ class Resonance:
             dF[l-1] = dot_phi[l-1]
 
         if write:
-            WriteFile(self.path_out, self.outfile, data)
+            self.Filer.WriteFile(self.path_out, self.outfile, data)
 
         if graph:
             if ang:
@@ -156,7 +158,7 @@ class Resonance:
                     'annotate': annotate,
                     'plot_type': plot_type['ang']
                 }
-                PrintCommonGraph(time1, *F, **params)
+                Grapher.PrintCommonGraph(time1, *F, **params)
         
             if freq:
                 params = {
@@ -177,7 +179,7 @@ class Resonance:
                     'annotate': annotate,
                     'plot_type': plot_type['freq']
                 }
-                PrintCommonGraph(time2, *dF, **params)
+                Grapher.PrintCommonGraph(time2, *dF, **params)
    
             if pair:
                 for idx in res:
@@ -201,8 +203,7 @@ class Resonance:
                         'annotate': annotate,
                         'plot_type': plot_type['pair']
                     }
-                    
-                    PrintCommonGraph(time, *args, **params)
+                    Grapher.PrintCommonGraph(time, *args, **params)
         return
 
     # async def second(self, *args, **kwargs) -> None:
@@ -235,7 +236,7 @@ class Resonance:
         annotate = kwargs.get('annotate', False)
 
 
-        time, F, dF = ReadResonance(self.path_resonance)
+        time, F, dF = self.filer.ReadResonance()
         
         F = np.array(F)
         dF = np.array(dF)
@@ -281,7 +282,8 @@ class Resonance:
                     'grid': grid,
                     'annotate': annotate,
                 }
-                PrintCommonGraph(time1, *F, **params)
+                Grapher.PrintCommonGraph(time1, *F, **params)
+            
             if freq:
                 params = {
                     'xlabel': 't, годы',
@@ -300,7 +302,7 @@ class Resonance:
                     'grid': grid,
                     'annotate': annotate,
                 }
-                PrintCommonGraph(time2, *dF, **params)
+                Grapher.PrintCommonGraph(time2, *dF, **params)
             
             if pair:
                 for idx in res:
@@ -325,8 +327,7 @@ class Resonance:
                         'grid': grid,
                         'annotate': annotate,
                     }
-
-                    PrintCommonGraph(time, *args, **params)
+                    Grapher.PrintCommonGraph(time, *args, **params)
 
 
 async def gather_data():
@@ -343,13 +344,18 @@ async def gather_data():
 @timer
 def main():
     # asyncio.run(gather_data())
-    # data = pd.read_excel(PATH_CLASSIFICATION)
-    # PrintMap(data, res=True, sec_plus=True, sec_minus=True, save=0, show=0)
+    data = pd.read_excel(PATH_CLASSIFICATION)
+    Grapher.PrintMap(data, 
+                    res=True, 
+                    sec_plus=True, 
+                    sec_minus=True, 
+                    save=0, 
+                    show=1)
 
     res = Resonance('EPH_0001.DAT', 'elements.csv', type_='9000', u=1, v=2)
     res.orbital(
-        ang=0, 
-        freq=0, 
+        ang=1, 
+        freq=1, 
         pair=1, 
         plot_type={
             'ang': [1] * 5,
@@ -358,11 +364,11 @@ def main():
         }, 
         annotate=0,
         # res=[1],
-        show=0)
+        show=1)
     
     res.second(
-        ang=0, 
-        freq=0, 
+        ang=1, 
+        freq=1, 
         pair=1, 
         plot_type={
             'ang': [1] * 5,
