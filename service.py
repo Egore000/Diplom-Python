@@ -151,17 +151,23 @@ def PrintCommonGraph(x: list, *args, **kwargs):
         } 
     '''
     path = kwargs.get('path')
-    plot_type = kwargs.get('plot_type', [1])
+    plot_type = kwargs.get('plot_type', [1] * len(args))
     line = kwargs.get('line', 0)
     save = kwargs.get('save', 1)
     grid = kwargs.get('grid', None)
     annotate = kwargs.get('annotate', False)
+    figsize = kwargs.get('figsize', (6, 4))
+    show = kwargs.get('show', None)
 
-    if not os.path.exists(path):
+    if save and path and not os.path.exists(path):
         os.makedirs(path)
 
-    fig = plt.figure(figsize=(12, 7))
+    fig = plt.figure(figsize=figsize)
     ax = fig.subplots(len(args), 1)
+    
+    if len(args) == 1:
+        ax = [ax]
+
     idx = 0
 
     def enum(x):
@@ -209,18 +215,19 @@ def PrintCommonGraph(x: list, *args, **kwargs):
     title = kwargs.get('title', 'Общий график')
     fig.suptitle(title)
 
-    graph_name = kwargs.get('graph_name')
+    graph_name = kwargs.get('graph_name', 'Общий график')
     if save:
         plt.savefig(path + f'\{graph_name}.png')
 
     mngr = plt.get_current_fig_manager()
     mngr.window.geometry('+0+0')
 
-    if kwargs.get('show', None):
+    if show:
         plt.show()
     plt.close(fig)
     # plt.clf()
     # plt.cla()
+    return fig, ax
     
 
 def PrintMap(data, *args, **kwargs) -> None:
@@ -238,7 +245,7 @@ def PrintMap(data, *args, **kwargs) -> None:
     color = kwargs.get('colors', ['#FFFFFF', '#F0F0F0', '#A0A0A0'])
     save = kwargs.get('save', params.autosave)
     show = kwargs.get('show', 1)
-    path = kwargs.get('path', params.path_map)
+    path = kwargs.get('path', params.PATH_MAP)
     
     if not os.path.exists(path):
         os.makedirs(path)
@@ -298,12 +305,16 @@ def timer(func):
     return wrap
 
 if __name__=="__main__":
-    import pandas as pd
+    # import pandas as pd
 
-    data = pd.read_excel(params.PATH_CLASSIFICATION)
-    PrintMap(data, res=True, sec_plus=True, sec_minus=True, save=1)
+    # data = pd.read_excel(params.PATH_CLASSIFICATION)
+    # PrintMap(data, res=True, sec_plus=True, sec_minus=True, save=1)
 
-    # PrintCommonGraph([1, 2, 3], [2, 3, 4], [1, 4, 2], [0,1,10])
+    plt.rcParams.update(params.custom_rcParams)
+    fig, ax = PrintCommonGraph(([1, 2, 3], [1, 2, 3], [1, 3, 5]), *([1, 2, 0], [1, 0, 1], [1, 3, 5]), plot_type=[0] * 5, show=0, save=0)
+    
+    fig.show()
+
     # t, F, dF = ReadResonance(r'C:\Users\egorp\Desktop\диплом\файлы\Pascal\Вторичные резонансы.dat')
     # list_file = os.listdir(params.path_data)
 

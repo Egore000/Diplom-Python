@@ -9,10 +9,11 @@ BASE_FOLDER = r'C:\Users\egorp\Desktop\диплом\файлы'
 # PATH_OUT = BASE_FOLDER + r'\Элементы'
 # PATH_RESONANCE = BASE_FOLDER + r'\Вторичные резонансы.dat'
 
-PATH_DATA = BASE_FOLDER + r'\Данные\1'
+# PATH_DATA = BASE_FOLDER + r'\Данные\Без светового давления\1'
+PATH_DATA = BASE_FOLDER + r'\Данные\Со световым давлением\1'
 PATH_FIG = BASE_FOLDER + r'\графики\Орбитальные резонансы\Спутники'
 PATH_OUT = BASE_FOLDER + r'\Элементы'
-PATH_RESONANCE = BASE_FOLDER + r'\Данные\Выход\Вторичные\минус'
+PATH_RESONANCE = BASE_FOLDER + r'\Данные\Выход\Вторичные\плюс'
 PATH_CLASSIFICATION = BASE_FOLDER + r'\Rezonansy1_2.xlsx'
 PATH_MAP = BASE_FOLDER + r'\графики\Зоны'
 

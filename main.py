@@ -233,7 +233,7 @@ class Resonance:
             'pair': [0, 1]
         })
         annotate = kwargs.get('annotate', False)
-        
+
 
         time, F, dF = ReadResonance(self.path_resonance)
         
@@ -321,7 +321,7 @@ class Resonance:
                         'save': autosave,
                         # 'plot_type': [0, 1],
                         'plot_type': plot_type['pair'],
-                        'title': f'Ф{idx}',
+                        'title': f"Ф'{idx}",
                         'grid': grid,
                         'annotate': annotate,
                     }
@@ -343,9 +343,10 @@ async def gather_data():
 @timer
 def main():
     # asyncio.run(gather_data())
-    data = pd.read_excel(PATH_CLASSIFICATION)
+    # data = pd.read_excel(PATH_CLASSIFICATION)
+    # PrintMap(data, res=True, sec_plus=True, sec_minus=True, save=0, show=0)
 
-    res = Resonance('EPH_8998.DAT', 'elements.csv', type_='9000', u=1, v=2)
+    res = Resonance('EPH_0001.DAT', 'elements.csv', type_='9000', u=1, v=2)
     res.orbital(
         ang=0, 
         freq=0, 
@@ -357,7 +358,7 @@ def main():
         }, 
         annotate=0,
         # res=[1],
-        show=1)
+        show=0)
     
     res.second(
         ang=0, 
@@ -370,9 +371,8 @@ def main():
         }, 
         annotate=0,
         # res=[1, 5],
-        show=0)
+        show=1)
     
-    PrintMap(data, res=True, sec_plus=True, sec_minus=True, save=0, show=0)
 
 if __name__=="__main__":
     main()
