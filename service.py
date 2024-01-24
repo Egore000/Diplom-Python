@@ -249,7 +249,7 @@ class Grapher:
             mngr = plt.get_current_fig_manager()
             mngr.window.geometry('+0+0')
             plt.show()
-        plt.close(fig)
+        # plt.close(fig)
         # plt.clf()
         # plt.cla()
         return
@@ -298,9 +298,8 @@ class Grapher:
             ax = fig.subplots(3, 2)
             fig.delaxes(ax[2, 1])
             
-            if save:
-                if path and not os.path.exists(path):
-                    os.makedirs(path)
+            if save and path and not os.path.exists(path):
+                os.makedirs(path)
 
             row = 0
             col = 0
@@ -332,6 +331,8 @@ class Grapher:
                 mngr = plt.get_current_fig_manager()
                 mngr.window.geometry('+0+0')
                 plt.show()
+            else:
+                plt.close(fig)
         return
 
 

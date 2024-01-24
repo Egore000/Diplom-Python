@@ -2,20 +2,20 @@ import matplotlib.pyplot as plt
 import math
 
 autosave = 0
-BASE_FOLDER = r'C:\Users\egorp\Desktop\диплом\файлы'
+BASE_FOLDER = 'C:\\Users\\egorp\\Desktop\\диплом\\файлы\\'
 
 # PATH_DATA = BASE_FOLDER + r'\ЧМ ИСЗ (для ПК) 28.04.20 Lobbie III'
 # PATH_FIG = BASE_FOLDER + r'\графики\Орбитальные резонансы'
 # PATH_OUT = BASE_FOLDER + r'\Элементы'
 # PATH_RESONANCE = BASE_FOLDER + r'\Вторичные резонансы.dat'
 
-# PATH_DATA = BASE_FOLDER + r'\Данные\Без светового давления\1'
-PATH_DATA = BASE_FOLDER + r'\Данные\Со световым давлением\1'
-PATH_FIG = BASE_FOLDER + r'\графики\Орбитальные резонансы\Спутники'
-PATH_OUT = BASE_FOLDER + r'\Элементы'
-PATH_RESONANCE = BASE_FOLDER + r'\Данные\Выход\Вторичные\плюс'
-PATH_CLASSIFICATION = BASE_FOLDER + r'\Rezonansy1_2.xlsx'
-PATH_MAP = BASE_FOLDER + r'\графики\Зоны'
+PATH_DATA = BASE_FOLDER + 'Исходные данные\\'
+PATH_FIG = BASE_FOLDER + 'графики\\Орбитальные резонансы\\Спутники\\'
+PATH_OUT = BASE_FOLDER + 'Элементы\\'
+PATH_OUTDATA = BASE_FOLDER + 'Выходные данные\\'
+# PATH_CLASSIFICATION = BASE_FOLDER + 'Rezonansy1_2__01012000.xlsx'
+PATH_CLASSIFICATION = BASE_FOLDER + 'Rezonansy1_2_bez_LE.xlsx'
+PATH_MAP = BASE_FOLDER + 'графики\\Зоны\\'
 
 mu = 3.986004418e+5
 eps = 1e-12
@@ -39,7 +39,7 @@ custom_rcParams = {
     'font.family': 'Times New Roman'
 }
 
-FIGSIZE = (6, 4)
+FIGSIZE = (8, 5)
 
 marker_style = {
     'marker': '.',
