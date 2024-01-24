@@ -139,7 +139,7 @@ class Resonance:
             dF[l-1] = dot_phi[l-1]
 
         if write:
-            self.Filer.WriteFile(self.path_out, self.outfile, data)
+            self.filer.WriteFile(self.path_out, self.outfile, data)
 
         if graph:
             if ang:
