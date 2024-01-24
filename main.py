@@ -1,12 +1,8 @@
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 from math import *
 import asyncio
 import pandas as pd
-
-from itertools import product
-from AnglesPy import Angles
 
 from service import *
 from mechanics import *
@@ -25,14 +21,21 @@ class Resonance:
     type_: str     # тип файла ('9000' - файлы из набора 9000 спутников
                    #            'NM' - файлы численной модели (ЧМ ИСЗ))
     '''
-    def __init__(self, infile: str, outfile: str, u=1, v=2, type_='9000'):
+    def __init__(self, folder: int, infile: str, outfile: str, u=1, v=2, type_='9000', light_effect=False):
+        self.folder = folder
+        
         self.infile = infile
         self.outfile = outfile
         
-        self.path_data = PATH_DATA + '\\' + infile
+        if light_effect:
+            TARGET = 'Со световым давлением\\'
+        else:
+            TARGET = 'Без светового давления\\'
+
+        self.path_data = PATH_DATA + TARGET + f"\\{folder}" + '\\' + infile
         self.path_fig = PATH_FIG
         self.path_out = PATH_OUT
-        self.path_resonance = PATH_RESONANCE + '\\' + infile.split('_')[1]
+        self.path_resonance = PATH_OUTDATA + TARGET + 'Вторичные\\' + f'\\плюс\\{folder}' + '\\' + infile.split('_')[1]
         self.type = type_ 
 
         self.u = u
@@ -347,12 +350,13 @@ def main():
     data = pd.read_excel(PATH_CLASSIFICATION)
     Grapher.PrintMap(data, 
                     res=True, 
-                    sec_plus=True, 
-                    sec_minus=True, 
-                    save=0, 
+                    sec_plus=False, 
+                    sec_minus=False, 
+                    save=0,
+                    colors=['#F0F0F0', '#002000', '#A0A0A0'],
                     show=1)
 
-    res = Resonance('EPH_0001.DAT', 'elements.csv', type_='9000', u=1, v=2)
+    res = Resonance(1, 'EPH_0001.DAT', 'elements.csv', light_effect=False)
     res.orbital(
         ang=1, 
         freq=1, 
@@ -364,7 +368,7 @@ def main():
         }, 
         annotate=0,
         # res=[1],
-        show=1)
+        show=0)
     
     res.second(
         ang=1, 
@@ -377,7 +381,7 @@ def main():
         }, 
         annotate=0,
         # res=[1, 5],
-        show=1)
+        show=0)
     
 
 if __name__=="__main__":
